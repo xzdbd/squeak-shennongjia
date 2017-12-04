@@ -1,0 +1,7 @@
+appname = squeak
+httpport = 8094
+runmode = dev
+dbconnection = "host= user= password= dbname= sslmode=disable"
+pollutionschedule = "0 */10 * * * *"
+pm25token = ""
+gisAdminToken = ""

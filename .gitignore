@@ -1,0 +1,8 @@
+*.exe
+*.test
+*.prof
+
+squeak-shennongjia
+!static/js/squeak
+
+conf/app.conf
