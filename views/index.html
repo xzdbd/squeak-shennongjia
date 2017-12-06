@@ -293,13 +293,13 @@
           <div class="calcite-div-content-box-container" id="resultContentContainer">
             <div class="calcite-div-content-info-container">
               <div class="calcite-div-content-header-container">
-                <div class="calcite-div-content-span-header"><span class="esri-icon-home"></span> 当前站点</div>
+                <div class="calcite-div-content-span-header"><span class="esri-icon-home"></span> 当前自然保护区</div>
                 <div class="calcite-div-content-result-content">
                   <div>
                     <div class="calcite-div-content-div-clear"></div>
-                    <div class="calcite-div-content-info-text" id="detail-station-name">监测站名称： </div>
-                    <div class="calcite-div-content-info-text" id="detail-station-area">所在城市： </div>
-                    <div class="calcite-div-content-info-text" id="detail-station-time">数据更新时间： </div>
+                    <div class="calcite-div-content-info-text" id="detail-name">保护区名称： </div>
+                    <div class="calcite-div-content-info-text" id="detail-category">类别： </div>
+                    <div class="calcite-div-content-info-text" id="detail-time">数据更新时间： </div>
                   </div>
                 </div>
               </div>
@@ -315,33 +315,41 @@
                 <div class="calcite-div-content-result-content">
                   <div>
                     <div class="calcite-div-content-div-clear"></div>
-                    <div class="calcite-div-content-info-text" id="detail-detail-quality">空气质量： </div>
-                    <div class="calcite-div-content-info-text" id="detail-detail-aqi">AQI: </div>
-                    <div class="calcite-div-content-info-text" id="detail-detail-primary-pollutant">首要污染物: </div>
-                    <div class="calcite-div-content-info-text" id="detail-detail-pm25">PM2.5: </div>
-                    <div class="calcite-div-content-info-text" id="detail-detail-pm10">PM10: </div>
-                    <div class="calcite-div-content-info-text" id="detail-detail-co">CO: </div>
-                    <div class="calcite-div-content-info-text" id="detail-detail-no2">NO2: </div>
-                    <div class="calcite-div-content-info-text" id="detail-detail-o3">O3: </div>
-                    <div class="calcite-div-content-info-text" id="detail-detail-so2">SO2: </div>
+                    <div class="calcite-div-content-info-text" id="detail-detail-primary-plant">主要植被： </div>
+                    <div class="calcite-div-content-info-text" id="detail-detail-plant-num">植被数量: </div>
                   </div>
                 </div>
               </div>
             </div> 
           </div>
 
-          <div class="calcite-div-content-chart-container" id="result3ContentContainer">
-            <div class="calcite-div-content-info-container">
-              <div class="calcite-div-content-header-container">
-                <div>
-                  <div class="calcite-div-content-span-header"><span class="esri-icon-table"></span> 最近24小时空气质量趋势</div>  
+          <div class="calcite-div-content-box-container" id="result2ContentContainer">
+              <div class="calcite-div-content-info-container">
+                <div class="calcite-div-content-header-container">
+                  <div>
+                    <div class="calcite-div-content-span-header"><span class="esri-icon-table"></span> 实景照片</div>  
+                  </div> 
+                  <div class="calcite-div-content-result-content">
+                      <img id="view-image" style="width: 320px; height: 150px;"/>
+                  </div>
                 </div>
-                <div class="calcite-div-content-result-content">
-                  <div id="chart" style="width: 850px; height: 150px;"></div>
-                </div>
-              </div>
-            </div> 
+              </div> 
           </div>
+
+          <div class="calcite-div-content-box-container" id="result2ContentContainer">
+              <div class="calcite-div-content-info-container">
+                <div class="calcite-div-content-header-container">
+                  <div>
+                    <div class="calcite-div-content-span-header"><span class="esri-icon-table"></span> 植被空间分析</div>  
+                  </div> 
+                  <div class="calcite-div-content-result-content">
+                    <br/>
+                    <button type="button" class="btn btn-success" id="submitGP" data-dismiss="modal">开始分析</button>
+                  </div>
+                </div>
+              </div> 
+          </div>
+          
 
         </div>
       </div>

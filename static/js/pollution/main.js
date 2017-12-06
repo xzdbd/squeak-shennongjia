@@ -41,6 +41,7 @@ require([
   "dojo/_base/declare",
   "dojo/dom-style",
   "dojo/_base/fx",
+  "dojo/dom-attr",
 
   //cedar chart
   "cedar",
@@ -59,7 +60,7 @@ require([
   // Dojo
   "dojo/domReady!"
 ], function (Map, Basemap, VectorTileLayer, MapView, SceneView, Search, Popup, Home, Legend, ColorPicker,
-  watchUtils, FeatureLayer, MapImageLayer, TileLayer, PictureMarkerSymbol, QueryTask, Query, GraphicsLayer, Geoprocessor, FeatureSet, Field, query, domClass, dom, on, domConstruct, date, locale, request, declare, domStyle, fx, Cedar, CalciteMapsSettings) {
+  watchUtils, FeatureLayer, MapImageLayer, TileLayer, PictureMarkerSymbol, QueryTask, Query, GraphicsLayer, Geoprocessor, FeatureSet, Field, query, domClass, dom, on, domConstruct, date, locale, request, declare, domStyle, fx, domAttr, Cedar, CalciteMapsSettings) {
 
     app = {
       scale: 577790.554289,
@@ -202,21 +203,14 @@ require([
     }
 
     function updateDetailInfo(response) {
-      dom.byId("detail-station-name").innerHTML = "监测站名称: " + isNullValue(response.results[0].graphic.getAttribute("name"));
-      dom.byId("detail-station-area").innerHTML = "所在城市: " + isNullValue(response.results[0].graphic.getAttribute(["city"]));
-      dom.byId("detail-station-time").innerHTML = "数据更新时间： " + isNullValue(formatDate(getLocalTime(response.results[0].graphic.getAttribute(["time"]))));
+      dom.byId("detail-name").innerHTML = "保护区名称: " + isNullValue(response.results[0].graphic.getAttribute("name"));
+      dom.byId("detail-category").innerHTML = "类别: " + isNullValue(response.results[0].graphic.getAttribute("category"));
+      dom.byId("detail-time").innerHTML = "数据更新时间： 2017/12/05 4:00 PM";
 
-      dom.byId("detail-detail-quality").innerHTML = "空气质量: " + isNullValue(response.results[0].graphic.getAttribute(["quality"]));
-      dom.byId("detail-detail-aqi").innerHTML = "AQI: " + isNullValue(response.results[0].graphic.getAttribute(["aqi"]));
-      dom.byId("detail-detail-primary-pollutant").innerHTML = "首要污染物: " + isNullValue(response.results[0].graphic.getAttribute(["primary_pollutant"]));
-      dom.byId("detail-detail-pm25").innerHTML = "PM2.5: " + isNullValue(response.results[0].graphic.getAttribute(["pm25"]));
-      dom.byId("detail-detail-pm10").innerHTML = "PM10: " + isNullValue(response.results[0].graphic.getAttribute(["pm10"]));
-      dom.byId("detail-detail-co").innerHTML = "CO: " + isNullValue(response.results[0].graphic.getAttribute(["co"]));
-      dom.byId("detail-detail-no2").innerHTML = "NO2: " + isNullValue(response.results[0].graphic.getAttribute(["no2"]));
-      dom.byId("detail-detail-o3").innerHTML = "O3: " + isNullValue(response.results[0].graphic.getAttribute(["o3"]));
-      dom.byId("detail-detail-so2").innerHTML = "SO2: " + isNullValue(response.results[0].graphic.getAttribute(["so2"]));
+      dom.byId("detail-detail-primary-plant").innerHTML = "主要植被: " + isNullValue(response.results[0].graphic.getAttribute("primary_plant"));
+      dom.byId("detail-detail-plant-num").innerHTML = "植被数量: " + isNullValue(response.results[0].graphic.getAttribute("plant_num"));
 
-      updateChartInfo(response.results[0].graphic.getAttribute(["id"]));
+      updateImageInfo(response.results[0].graphic.getAttribute(["id"]));
 
       function getLocalTime(timestamp) {
         return new Date(parseInt(timestamp));
@@ -337,12 +331,6 @@ require([
           },
           ]
         },],
-
-        actions: [{
-          title: "详情",
-          id: "detail",
-          className: "esri-icon-dashboard",
-        }]
       };
       var queryTask = new QueryTask({
         url: layer
@@ -617,60 +605,10 @@ require([
     }
 
     //----------------------------------
-    // Chart
+    // updateImageInfo
     //----------------------------------
-    function updateChartInfo(stationId) {
-      var chartData
-      if (stationId != null) {
-        request.post("./pollution/chart?id=" + stationId, {
-          handleAs: "json"
-        }).then(function (data) {
-          /*var features = {
-            "features": [{ "attributes": { "name": "111", "aqi": 32 } },
-            { "attributes": { "name": "222", "aqi": 42 } }]
-          };*/
-          var features = { "features": [] }
-          data.forEach(function (data) {
-            features.features.push({ "attributes": { "time_point": getUnixTimestamp(getLocalTime(data.time_point)), "aqi": data.aqi, "full_time": formatFullDate(getLocalTime(data.time_point)) } })
-          })
-          var chart = new Cedar({ "type": "time" });
-          var dataset = {
-            "data": features,
-            "mappings": {
-              "time": { "field": "time_point", "label": "time" },
-              "value": { "field": "aqi", "label": "aqi" },
-              "sort": "full_time ASC",
-            }
-          };
-
-          chart.dataset = dataset;
-
-          chart.tooltip = {
-            "title": "{full_time}",
-            "content": "AQI: {aqi}"
-          }
-
-          chart.show({
-            elementId: "#chart",
-          });
-        });
-      }
-
-      function getLocalTime(time) {
-        return new Date(time);
-      }
-
-      function formatSimpleDate(date) {
-        return locale.format(date, { selector: "time", timePattern: 'H' });
-      };
-
-      function formatFullDate(date) {
-        return locale.format(date, { datePattern: 'yyyy-MM-d', timePattern: 'HH:mm' });
-      };
-
-      function getUnixTimestamp(date) {
-        return date.getTime()
-      }
-
+    function updateImageInfo(id) {
+      imageNode = query("#view-image")[0]
+      domAttr.set(imageNode, "src", "static/images/"+id+".jpg")
     }
   });
