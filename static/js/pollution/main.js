@@ -29,6 +29,8 @@ require([
   "esri/tasks/Geoprocessor",
   "esri/tasks/support/FeatureSet",
   "esri/layers/support/Field",
+  "esri/symbols/SimpleLineSymbol",
+  "esri/Color",
 
   "dojo/query",
   "dojo/dom-class",
@@ -60,7 +62,7 @@ require([
   // Dojo
   "dojo/domReady!"
 ], function (Map, Basemap, VectorTileLayer, MapView, SceneView, Search, Popup, Home, Legend, ColorPicker,
-  watchUtils, FeatureLayer, MapImageLayer, TileLayer, PictureMarkerSymbol, QueryTask, Query, GraphicsLayer, Geoprocessor, FeatureSet, Field, query, domClass, dom, on, domConstruct, date, locale, request, declare, domStyle, fx, domAttr, Cedar, CalciteMapsSettings) {
+  watchUtils, FeatureLayer, MapImageLayer, TileLayer, PictureMarkerSymbol, QueryTask, Query, GraphicsLayer, Geoprocessor, FeatureSet, Field, SimpleLineSymbol, Color, query, domClass, dom, on, domConstruct, date, locale, request, declare, domStyle, fx, domAttr, Cedar, CalciteMapsSettings) {
 
     app = {
       scale: 577790.554289,
@@ -106,6 +108,7 @@ require([
         }
       },
       loading: null,
+      currentSelectedPointID: null,
     }
 
     //----------------------------------
@@ -211,6 +214,7 @@ require([
       dom.byId("detail-detail-plant-num").innerHTML = "植被数量: " + isNullValue(response.results[0].graphic.getAttribute("plant_num"));
 
       updateImageInfo(response.results[0].graphic.getAttribute(["id"]));
+      updatePathInfo(response.results[0].graphic.getAttribute(["id"]));
 
       function getLocalTime(timestamp) {
         return new Date(parseInt(timestamp));
@@ -376,6 +380,7 @@ require([
       setPopupEvents();
       setResultContentEvents();
       setAnalysisEvents();
+      setRoadAnalysisEvents();
     }
 
     //----------------------------------
@@ -553,57 +558,7 @@ require([
       });
     }
 
-    //----------------------------------
-    // Analysis events
-    //----------------------------------
-    function setAnalysisEvents() {
-      query("#submitGP").on("click", function (e) {
-        var gp = new Geoprocessor("https://gis.xzdbd.com/arcgis/rest/services/dev/PollutionOverlay/GPServer/Overlay");
-        var featureSet = new FeatureSet()
-
-        var layer = "https://gis.xzdbd.com/arcgis/rest/services/dev/PollutionStation/MapServer/0";
-        var queryTask = new QueryTask({
-          url: layer
-        });
-        var query = new Query();
-        query.returnGeometry = true;
-        query.outFields = ["*"];
-        query.where = "1=1";
-
-        queryTask.execute(query, { cacheBust: false }).then(function (result) {
-          console.log(result);
-          result.fields.push(new Field(
-            {
-              alias: "no2",
-              name: "view_latest_pollution.no2",
-              type: "double"
-            })
-          );
-          result.features.forEach(function (graphic) {
-            graphic.setAttribute("view_latest_pollution.no2", graphic.getAttribute("no2"))
-          });
-          featureSet = result;
-          console.log(featureSet);
-          var params = {
-            "hangzhouPollutionStation": featureSet
-          };
-          gp.submitJob(params).then(draw, errBack, progTest);
-
-          function draw(result) {
-            connsole.log(result)
-          }
-
-          function progTest(value) {
-            console.log(value.jobStatus);
-          }
-
-          function errBack(err) {
-            console.log("gp error: ", err);
-          }
-        });
-      });
-    }
-
+  
     //----------------------------------
     // updateImageInfo
     //----------------------------------
@@ -611,4 +566,78 @@ require([
       imageNode = query("#view-image")[0]
       domAttr.set(imageNode, "src", "static/images/"+id+".jpg")
     }
+
+    //----------------------------------
+    // Analysis events
+    //----------------------------------
+    function setAnalysisEvents() {
+      var mapImageLayer = new MapImageLayer();
+      
+      query("#submitGP").on("click", function (e) {
+        mapImageLayer.url= "https://gis.xzdbd.com/arcgis/rest/services/dev/hackthon_test/MapServer";
+        mapImageLayer.opacity = 0.8;
+        app.mapView.map.add(mapImageLayer);
+      });
+      query("#hideGP").on("click", function (e) {
+        if (mapImageLayer.url != null) {
+          if (e.currentTarget.checked) {
+            //hide
+            app.mapView.map.remove(mapImageLayer);
+          } else {
+            app.mapView.map.add(mapImageLayer);
+          }  
+        } 
+      });
+    }
+
+
+    function updatePathInfo(id) {
+      app.currentSelectedPointID = id
+    }
+
+    //----------------------------------
+    // Road events
+    //----------------------------------
+    function setRoadAnalysisEvents(id) {
+      var pointID = id
+      var mapImageLayer = new MapImageLayer();
+      var roadGraphicsLayer = new GraphicsLayer();
+      
+      query("#minPath").on("click", function (e) {
+        roadGraphicsLayer.removeAll();
+        var layer = "https://gis.xzdbd.com/arcgis/rest/services/dev/shennongjia/MapServer/2";
+        var lineSymbol = new SimpleLineSymbol(
+          SimpleLineSymbol.STYLE_SOLID,
+          new Color([255,0,0]),
+          3
+        );
+        
+        var queryTask = new QueryTask({
+          url: layer
+        });
+        var query = new Query();
+        query.returnGeometry = true;
+        query.outFields = ["*"];
+        query.where = "ID=" + app.currentSelectedPointID;
+  
+        queryTask.execute(query, { cacheBust: false }).then(function (result) {
+          if (result.features.length > 0) {
+            result.features.forEach(function (graphic) {
+              graphic.symbol = lineSymbol;
+              roadGraphicsLayer.add(graphic);
+            });
+            app.mapView.map.add(roadGraphicsLayer);
+          }
+        });
+      });
+      query("#hideMinPath").on("click", function (e) {
+        if (e.currentTarget.checked) {
+          //hide
+          app.mapView.map.remove(roadGraphicsLayer);
+        } else {
+          app.mapView.map.add(roadGraphicsLayer);
+        }  
+      });
+    }
+
   });
